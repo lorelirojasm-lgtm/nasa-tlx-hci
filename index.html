@@ -101,12 +101,12 @@ audio{height:30px;flex:1;min-width:140px;max-width:260px}
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwqFVZLjZ-kOD5Dzuzt2hYFAYAnqkEkuWvaU0eQkGumLWVncMCOOZ1hDmhSeKNN-8KM4w/exec";
 
 const DIMS=[
-  {id:"mental",     label:"Exigencia mental",    q:"¿Qué tan exigente fue mentalmente esta tarea? ¿La sintió fácil o difícil, simple o compleja?"},
-  {id:"fisica",     label:"Exigencia física",     q:"¿Cuánta actividad física fue necesaria? ¿Se trató de una tarea fácil o difícil, lenta o rápida, relajada o cansada?"},
-  {id:"temporal",   label:"Exigencia temporal",   q:"¿Cuánta presión de tiempo sintió debido al ritmo de la tarea? ¿Era el ritmo lento y pausado o rápido y frenético?"},
-  {id:"esfuerzo",   label:"Esfuerzo",             q:"¿En qué medida tuvo que trabajar física o mentalmente para alcanzar su nivel de resultados?"},
-  {id:"rendimiento",label:"Rendimiento",          q:"¿Hasta qué punto cree que tuvo éxito en los objetivos? ¿Cuál es su satisfacción con su nivel de ejecución?"},
-  {id:"frustracion",label:"Nivel de frustración", q:"Describa sentimientos de frustración, estrés, irritación o incomodidad — o si se sintió tranquilo/a, satisfecho/a y en control."}
+  {id:"mental",     label:"Exigencia mental",    polos:"Baja ↔ Alta",    q:"¿Cuánta actividad mental y perceptiva fue necesaria? (pensar, decidir, calcular, recordar, buscar, etc.). ¿Se trata de una tarea fácil o difícil, simple o compleja, pesada o ligera?"},
+  {id:"fisica",     label:"Exigencia física",     polos:"Baja ↔ Alta",    q:"¿Cuánta actividad física fue necesaria? (empujar, tirar, girar, pulsar, accionar, etc.). ¿Se trata de una tarea fácil o difícil, lenta o rápida, relajada o cansada?"},
+  {id:"temporal",   label:"Exigencia temporal",   polos:"Baja ↔ Alta",    q:"¿Cuánta presión de tiempo sintió, debido al ritmo al cual se sucedían las tareas? ¿Era el ritmo lento y pausado o rápido y frenético?"},
+  {id:"esfuerzo",   label:"Esfuerzo",             polos:"Bajo ↔ Alto",    q:"¿En qué medida ha tenido que trabajar (física o mentalmente) para alcanzar su nivel de resultados?"},
+  {id:"rendimiento",label:"Rendimiento",          polos:"Bueno ↔ Malo",   q:"¿Hasta qué punto cree que ha tenido éxito en los objetivos establecidos? ¿Cuál es su grado de satisfacción con su nivel de ejecución?"},
+  {id:"frustracion",label:"Nivel de frustración", polos:"Bajo ↔ Alto",    q:"Durante la tarea, ¿en qué medida se sintió inseguro/a, desalentado/a, irritado/a, tenso/a o preocupado/a? ¿O por el contrario, se sintió seguro/a, contento/a, relajado/a y satisfecho/a?"}
 ];
 
 let PID="";
