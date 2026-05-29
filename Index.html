@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NASA-TLX · HCI UCR 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F5F3EE;--surface:#FFFFFF;--border:#D8D4CB;--text:#1A1915;--muted:#7A7670;
+  --accent:#2A4A7F;--accent-light:#E8EDF5;--red:#8B2020;--red-light:#F5EAEA;
+  --green:#1A5C38;--green-light:#E8F5EE;--amber:#7A4F00;--amber-light:#FDF5E6;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;--radius:6px;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;padding:2rem 1rem 4rem}
+.page{max-width:640px;margin:0 auto}
+.site-header{margin-bottom:2.5rem;border-bottom:1px solid var(--border);padding-bottom:1.25rem}
+.site-header .eyebrow{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem}
+.site-header h1{font-size:22px;font-weight:500;letter-spacing:-.02em}
+.site-header .sub{font-size:13px;color:var(--muted);margin-top:.3rem}
+.id-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.5rem}
+.id-section label{font-size:12px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:block;margin-bottom:.5rem}
+.id-row{display:flex;gap:8px}
+.id-row input{flex:1;font-family:var(--mono);font-size:14px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text)}
+.id-row input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.btn-confirm{padding:8px 16px;border:1px solid var(--accent);border-radius:var(--radius);background:var(--accent);color:#fff;font-family:var(--sans);font-size:13px;cursor:pointer;transition:opacity .15s}
+.btn-confirm:hover{opacity:.88}
+.btn-confirm:disabled{opacity:.4;cursor:not-allowed}
+.id-confirmed{font-family:var(--mono);font-size:12px;color:var(--green);margin-top:.5rem;display:none}
+.id-confirmed.show{display:block}
+.dim-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:10px;transition:border-color .2s}
+.dim-card.done{border-color:#9FD4B4}
+.dim-card.recording{border-color:#E8A0A0}
+.dim-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:.75rem}
+.dim-num{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:.15rem}
+.dim-title{font-size:15px;font-weight:500}
+.dim-q{font-size:13px;color:var(--muted);line-height:1.55;margin-top:.3rem}
+.badge{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:3px;white-space:nowrap;flex-shrink:0;letter-spacing:.04em;text-transform:uppercase}
+.badge-pending{background:#EEECE8;color:var(--muted)}
+.badge-rec{background:var(--red-light);color:var(--red)}
+.badge-done{background:var(--green-light);color:var(--green)}
+.dim-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn-rec{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;cursor:pointer;transition:all .15s}
+.btn-rec:hover{border-color:var(--accent);color:var(--accent)}
+.btn-rec.active{background:var(--red-light);border-color:var(--red);color:var(--red)}
+.btn-rec:disabled{opacity:.35;cursor:not-allowed}
+.dot-pulse{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.timer{font-family:var(--mono);font-size:12px;color:var(--muted);min-width:36px}
+audio{height:30px;flex:1;min-width:140px;max-width:260px}
+.upload-status{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.upload-status.ok{color:var(--green)}
+.upload-status.err{color:var(--red)}
+.summary{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1.5rem}
+.summary h2{font-size:13px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.75rem}
+.progress-bar{height:4px;background:#EEECE8;border-radius:2px;margin-bottom:1rem;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:1rem}
+.summary-row{font-size:12px;display:flex;align-items:center;gap:6px;color:var(--muted)}
+.summary-row .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:#EEECE8}
+.summary-row.done .dot{background:#4AAF7A}
+.summary-row.done{color:var(--text)}
+.note{font-size:12px;color:var(--muted);line-height:1.5;border-top:1px solid var(--border);padding-top:.75rem}
+.note strong{color:var(--text)}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="site-header">
+    <div class="eyebrow">Universidad de Costa Rica · HCI 2026</div>
+    <h1>NASA-TLX — Grabación de respuestas</h1>
+    <div class="sub">Agente conversacional socr&aacute;tico · PF-3855</div>
+  </header>
+
+  <div class="id-section">
+    <label>ID de participante</label>
+    <div class="id-row">
+      <input type="text" id="pid" placeholder="Ej. P01" maxlength="10"/>
+      <button class="btn-confirm" id="btn-confirm" onclick="confirmID()">Confirmar</button>
+    </div>
+    <div class="id-confirmed" id="id-confirmed"></div>
+  </div>
+
+  <div id="dims"></div>
+
+  <div class="summary" id="summary" style="display:none">
+    <h2>Progreso</h2>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="summary-grid" id="summary-grid"></div>
+    <div class="note">
+      <strong>Los audios se guardan autom&aacute;ticamente en Google Drive</strong>
+      dentro de la carpeta <code>NASA-TLX Audios HCI UCR / [ID]</code>.
+      Si aparece un error de red, us&aacute; el bot&oacute;n ↓ para descargar el archivo manualmente.
+    </div>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwqFVZLjZ-kOD5Dzuzt2hYFAYAnqkEkuWvaU0eQkGumLWVncMCOOZ1hDmhSeKNN-8KM4w/exec";
+
+const DIMS=[
+  {id:"mental",     label:"Exigencia mental",    q:"¿Qué tan exigente fue mentalmente esta tarea? ¿La sintió fácil o difícil, simple o compleja?"},
+  {id:"fisica",     label:"Exigencia física",     q:"¿Cuánta actividad física fue necesaria? ¿Se trató de una tarea fácil o difícil, lenta o rápida, relajada o cansada?"},
+  {id:"temporal",   label:"Exigencia temporal",   q:"¿Cuánta presión de tiempo sintió debido al ritmo de la tarea? ¿Era el ritmo lento y pausado o rápido y frenético?"},
+  {id:"esfuerzo",   label:"Esfuerzo",             q:"¿En qué medida tuvo que trabajar física o mentalmente para alcanzar su nivel de resultados?"},
+  {id:"rendimiento",label:"Rendimiento",          q:"¿Hasta qué punto cree que tuvo éxito en los objetivos? ¿Cuál es su satisfacción con su nivel de ejecución?"},
+  {id:"frustracion",label:"Nivel de frustración", q:"Describa sentimientos de frustración, estrés, irritación o incomodidad — o si se sintió tranquilo/a, satisfecho/a y en control."}
+];
+
+let PID="";
+let recorders={}, blobs={}, streams={}, intervals={}, secs={};
+
+function confirmID(){
+  const p=document.getElementById("pid").value.trim();
+  if(!p){alert("Ingresá el ID de participante.");return;}
+  PID=p;
+  document.getElementById("pid").disabled=true;
+  document.getElementById("btn-confirm").disabled=true;
+  const el=document.getElementById("id-confirmed");
+  el.textContent="✓ "+PID; el.classList.add("show");
+  document.getElementById("summary").style.display="block";
+  renderSummary();
+}
+
+function renderCards(){
+  document.getElementById("dims").innerHTML=DIMS.map((d,i)=>`
+<div class="dim-card" id="card-${d.id}">
+  <div class="dim-top">
+    <div>
+      <div class="dim-num">${String(i+1).padStart(2,"0")} / ${DIMS.length}</div>
+      <div class="dim-title">${d.label}</div>
+      <div class="dim-q">${d.q}</div>
+    </div>
+    <span class="badge badge-pending" id="badge-${d.id}">Pendiente</span>
+  </div>
+  <div class="dim-controls" id="ctrl-${d.id}">
+    <button class="btn-rec" id="btn-${d.id}" onclick="toggleRec('${d.id}')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="10" stroke-dasharray="4 2"/></svg>
+      Grabar
+    </button>
+    <span class="timer" id="timer-${d.id}">0:00</span>
+  </div>
+</div>`).join("");
+}
+
+async function toggleRec(id){
+  if(!PID){alert("Confirmá tu ID primero.");return;}
+  if(recorders[id]&&recorders[id].state==="recording") stopRec(id);
+  else startRec(id);
+}
+
+async function startRec(id){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    streams[id]=stream;
+    const chunks=[];
+    const opts=MediaRecorder.isTypeSupported("audio/webm;codecs=opus")?{mimeType:"audio/webm;codecs=opus"}:{};
+    const mr=new MediaRecorder(stream,opts);
+    recorders[id]=mr;
+    mr.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
+    mr.onstop=()=>{
+      const mime=mr.mimeType||"audio/webm";
+      const blob=new Blob(chunks,{type:mime});
+      blobs[id]={blob,mime};
+      showPlayer(id,blob,mime);
+      uploadToDrive(id,blob,mime);
+      setCardState(id,"done");
+      renderSummary();
+    };
+    mr.start(250);
+    secs[id]=0;
+    intervals[id]=setInterval(()=>{
+      secs[id]++;
+      const m=Math.floor(secs[id]/60),s=secs[id]%60;
+      document.getElementById("timer-"+id).textContent=m+":"+(s<10?"0":"")+s;
+    },1000);
+    setCardState(id,"recording");
+    const btn=document.getElementById("btn-"+id);
+    btn.innerHTML=`<span class="dot-pulse"></span> Detener`;
+    btn.classList.add("active");
+  }catch(e){
+    alert("No se pudo acceder al micrófono. Verificá los permisos del navegador.");
+  }
+}
+
+function stopRec(id){
+  if(recorders[id])recorders[id].stop();
+  if(streams[id])streams[id].getTracks().forEach(t=>t.stop());
+  if(intervals[id])clearInterval(intervals[id]);
+  const btn=document.getElementById("btn-"+id);
+  btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="10" stroke-dasharray="4 2"/></svg> Re-grabar`;
+  btn.classList.remove("active");
+}
+
+function setCardState(id,state){
+  const card=document.getElementById("card-"+id);
+  const badge=document.getElementById("badge-"+id);
+  card.className="dim-card "+state;
+  if(state==="recording"){badge.textContent="Grabando…";badge.className="badge badge-rec";}
+  else if(state==="done"){badge.textContent="✓ Grabado";badge.className="badge badge-done";}
+}
+
+function showPlayer(id,blob,mime){
+  const url=URL.createObjectURL(blob);
+  const ctrl=document.getElementById("ctrl-"+id);
+  ctrl.querySelectorAll("audio,.dl-btn,.upload-status").forEach(el=>el.remove());
+  const audio=document.createElement("audio");
+  audio.controls=true; audio.src=url;
+  const ext=mime.includes("ogg")?"ogg":"webm";
+  const a=document.createElement("a");
+  a.href=url; a.download=`${PID}_${id}.${ext}`;
+  a.className="btn-rec dl-btn"; a.title="Descargar";
+  a.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3m0 12l-4-4m4 4l4-4M2 17v2a2 2 0 002 2h16a2 2 0 002-2v-2"/></svg>`;
+  const status=document.createElement("span");
+  status.className="upload-status"; status.id="status-"+id;
+  status.textContent="Subiendo…";
+  ctrl.appendChild(audio); ctrl.appendChild(a); ctrl.appendChild(status);
+}
+
+async function uploadToDrive(id,blob,mime){
+  const statusEl=document.getElementById("status-"+id);
+  try{
+    const b64=await blobToBase64(blob);
+    const body=JSON.stringify({participantID:PID, dimension:id, audioBase64:b64, mimeType:mime});
+    const res=await fetch(SCRIPT_URL,{method:"POST",body});
+    const json=await res.json();
+    if(json.ok){
+      statusEl.textContent="✓ Guardado en Drive";
+      statusEl.className="upload-status ok";
+    } else throw new Error(json.error||"Error");
+  }catch(e){
+    statusEl.textContent="⚠ Error de red — descargá manualmente";
+    statusEl.className="upload-status err";
+  }
+}
+
+function blobToBase64(blob){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(r.result.split(",")[1]);
+    r.onerror=()=>rej(new Error("FileReader error"));
+    r.readAsDataURL(blob);
+  });
+}
+
+function renderSummary(){
+  const done=DIMS.filter(d=>blobs[d.id]).length;
+  document.getElementById("progress-fill").style.width=Math.round(done/DIMS.length*100)+"%";
+  document.getElementById("summary-grid").innerHTML=DIMS.map(d=>`
+<div class="summary-row ${blobs[d.id]?"done":""}">
+  <span class="dot"></span><span>${d.label}</span>
+</div>`).join("");
+}
+
+renderCards();
+</script>
+</body>
+</html>
