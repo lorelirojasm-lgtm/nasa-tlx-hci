@@ -25,6 +25,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .id-row{display:flex;gap:8px}
 .id-row input{flex:1;font-family:var(--mono);font-size:14px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text)}
 .id-row input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.id-row select{flex:0 1 220px;font-family:var(--mono);font-size:14px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text)}
+.grp{display:flex;flex-direction:column;gap:6px}
+.grp label{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:14px;text-transform:none;letter-spacing:0;color:var(--text);margin:0;cursor:pointer}
+.grp input{width:16px;height:16px}
 .btn-confirm{padding:8px 16px;border:1px solid var(--accent);border-radius:var(--radius);background:var(--accent);color:#fff;font-family:var(--sans);font-size:13px;cursor:pointer;transition:opacity .15s}
 .btn-confirm:hover{opacity:.88}
 .btn-confirm:disabled{opacity:.4;cursor:not-allowed}
@@ -75,11 +79,16 @@ audio{height:30px;flex:1;min-width:140px;max-width:260px}
   </header>
 
   <div class="id-section">
-    <label>ID de participante</label>
+    <label for="pid">Seleccione el P asignado</label>
     <div class="id-row">
-      <input type="text" id="pid" placeholder="Ej. P01" maxlength="10"/>
-      <button class="btn-confirm" id="btn-confirm" onclick="confirmID()">Confirmar</button>
+      <select id="pid"><option value="">Elige</option></select>
     </div>
+    <label style="margin-top:1rem">Seleccione su grupo</label>
+    <div class="grp">
+      <label><input type="radio" name="grupo" value="Mañana"/> Mañana</label>
+      <label><input type="radio" name="grupo" value="Tarde"/> Tarde</label>
+    </div>
+    <button class="btn-confirm" id="btn-confirm" onclick="confirmID()" style="margin-top:.75rem">Confirmar</button>
     <div class="id-confirmed" id="id-confirmed"></div>
   </div>
 
@@ -111,17 +120,22 @@ const DIMS=[
   {id:"frustracion",label:"Nivel de frustración", polos:"Bajo ↔ Alto",    q:"Durante la tarea, ¿en qué medida se ha sentido inseguro/a, desalentado/a, irritado/a, tenso/a o preocupado/a, o por el contrario, se ha sentido seguro/a, contento/a, relajado/a y satisfecho/a?"}
 ];
 
-let PID="";
+let PID="", P_ASIG="", GRUPO="";
+const N_PARTICIPANTES=25;   // P1…P25 por grupo (mismo formato que el formulario del equipo)
+for(let i=1;i<=N_PARTICIPANTES;i++){ const o=document.createElement("option"); o.value=o.textContent="P"+i; document.getElementById("pid").appendChild(o); }
 let recorders={}, blobs={}, streams={}, intervals={}, secs={};
 
 function confirmID(){
-  const p=document.getElementById("pid").value.trim();
-  if(!p){alert("Ingresá el ID de participante.");return;}
-  PID=p;
+  const p=document.getElementById("pid").value;
+  const g=(document.querySelector('input[name="grupo"]:checked')||{}).value||"";
+  if(!p||!g){alert("Seleccioná tu P asignado y tu grupo.");return;}
+  P_ASIG=p; GRUPO=g;
+  PID=p+"_"+g;   // P7_Mañana: así no se mezclan los P7 de la mañana y de la tarde
   document.getElementById("pid").disabled=true;
+  document.querySelectorAll('input[name="grupo"]').forEach(r=>r.disabled=true);
   document.getElementById("btn-confirm").disabled=true;
   const el=document.getElementById("id-confirmed");
-  el.textContent="✓ "+PID; el.classList.add("show");
+  el.textContent="✓ "+p+" · "+g; el.classList.add("show");
   document.getElementById("summary").style.display="block";
   renderSummary();
 }
@@ -148,7 +162,7 @@ function renderCards(){
 }
 
 async function toggleRec(id){
-  if(!PID){alert("Confirmá tu ID primero.");return;}
+  if(!PID){alert("Seleccioná tu P y tu grupo, y tocá Confirmar.");return;}
   if(recorders[id]&&recorders[id].state==="recording") stopRec(id);
   else startRec(id);
 }
@@ -225,7 +239,7 @@ async function uploadToDrive(id,blob,mime){
   const statusEl=document.getElementById("status-"+id);
   try{
     const b64=await blobToBase64(blob);
-    const body=JSON.stringify({participantID:PID, dimension:id, audioBase64:b64, mimeType:mime});
+    const body=JSON.stringify({participantID:PID, participante:P_ASIG, grupo:GRUPO, dimension:id, audioBase64:b64, mimeType:mime});
     const res=await fetch(SCRIPT_URL,{method:"POST",body});
     const json=await res.json();
     if(json.ok){
